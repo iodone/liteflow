@@ -11,7 +11,7 @@ from typing import Any, Callable, Dict, List, Optional
 
 from lmnr import Laminar, observe
 
-from pyflow.executor import Executor
+from liteflow.executor import Executor
 
 from .context import Context
 from .state import State

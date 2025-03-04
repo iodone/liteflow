@@ -7,8 +7,8 @@ from lmnr.openllmetry_sdk.tracing.tracing import TracerWrapper
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import ConsoleSpanExporter, SimpleSpanProcessor
 
-from pyflow.executor import PoolExecutor
-from src.pyflow.flow import Context, Flow, NextTask, StreamChunk, TaskOutput
+from liteflow.executor import PoolExecutor
+from liteflow.flow import Context, Flow, NextTask, StreamChunk, TaskOutput
 
 
 @pytest.fixture(autouse=True)

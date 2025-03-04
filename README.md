@@ -1,8 +1,14 @@
-# PyFlow
+# LiteFlow
 
 A lightweight task flow framework
 
 ## Getting started
+
+### Installation
+
+```bash
+pip install liteflow
+```
 
 ### Basic Usage
 
@@ -10,8 +16,8 @@ Flow initializes a flow with a thread pool executor. Tasks are added to the flow
 
 ```python
 from concurrent.futures import ThreadPoolExecutor
-from pyflow import Flow, TaskOutput, NextTask, Context, StreamChunk
-from pyflow.executor import PoolExecutor
+from liteflow import Flow, TaskOutput, NextTask, Context, StreamChunk
+from liteflow.executor import PoolExecutor
 
 executor = PoolExecutor(ThreadPoolExecutor(max_workers=4))
 
