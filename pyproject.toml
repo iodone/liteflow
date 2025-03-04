@@ -1,0 +1,27 @@
+[tool.poetry]
+name = "pyflow"
+version = "0.1.0"
+description = "Lightweight task flow framework for Python"
+authors = ["Meta42"]
+readme = "README.md"
+license = "LICENSE"
+repository = "https://github.com/iodone/pyflow"
+packages = [
+    { include = "pyflow", from = "src" }
+]
+
+[tool.poetry.dependencies]
+python = "<4,>=3.9"
+lmnr = "^0.4.62"
+
+[tool.poetry.group.dev.dependencies]
+pytest = ">=8.3.3"
+
+[tool.pytest.ini_options]
+pythonpath = [
+    "src"
+]
+testpaths = [
+    "tests"
+]
+addopts = "-s"
