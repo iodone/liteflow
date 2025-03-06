@@ -17,6 +17,9 @@ lmnr = "^0.4.62"
 [tool.poetry.group.dev.dependencies]
 pytest = ">=8.3.3"
 
+[tool.poetry.extras]
+ray = ["ray>=2.0.0"]
+
 [tool.pytest.ini_options]
 pythonpath = [
     "src"
