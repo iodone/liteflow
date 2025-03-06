@@ -10,6 +10,11 @@ A lightweight task flow framework
 pip install liteflow
 ```
 
+For Ray support:
+```bash
+pip install liteflow[ray]
+```
+
 ### Basic Usage
 
 Flow initializes a flow with a thread pool executor. Tasks are added to the flow and can be run by their name.
@@ -31,6 +36,29 @@ def my_task(context: Context) -> TaskOutput:
 
 result = flow.run("greet")  # Returns {"greet": "Hello World!"}
 print(result)
+```
+
+### Using Ray Executor
+
+For distributed execution, you can use the RayExecutor:
+
+```python
+from liteflow import Flow, TaskOutput, RayExecutor
+
+# Initialize Ray executor
+executor = RayExecutor()  # Connects to local Ray cluster
+# Or connect to a remote Ray cluster
+# executor = RayExecutor(address="ray://192.168.1.100:10001")
+
+flow = Flow(executor=executor)
+
+@flow.task("distributed_task")
+def distributed_task(context):
+    # This task will be executed on a Ray worker
+    return TaskOutput(output="Executed on Ray!")
+
+result = flow.run("distributed_task")
+print(result)  # {"distributed_task": "Executed on Ray!"}
 ```
 
 ### Task Chaining
