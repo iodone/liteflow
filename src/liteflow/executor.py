@@ -40,14 +40,67 @@ class RayExecutor(Executor):
         if not ray.is_initialized():
             ray_init_kwargs.setdefault('ignore_reinit_error', True)
             ray.init(address=address, **ray_init_kwargs)
+        
+        # Define a Ray remote function for task execution
+        @ray.remote
+        def ray_execute_task(action_fn, task_id, task_inputs, context_data, logger_name=None):
+            """Execute a task in a Ray worker"""
+            from liteflow.flow import TaskOutput, NextTask
+            from liteflow.context import Context
+            import logging
+            
+            # Create a context with the provided data
+            ctx = Context()
+            if context_data:
+                for key, value in context_data.items():
+                    ctx.set(key, value)
+            
+            # Create a logger
+            logger = logging.getLogger(logger_name or "liteflow.ray")
+            
+            # Execute the action
+            try:
+                if task_inputs:
+                    result = action_fn(ctx, inputs=task_inputs)
+                else:
+                    result = action_fn(ctx)
+                
+                return result
+            except Exception as e:
+                import traceback
+                error_info = {
+                    "error": str(e),
+                    "traceback": traceback.format_exc()
+                }
+                return error_info
+        
+        self._ray_execute_task = ray_execute_task
             
     def submit(self, fn: Callable, *args, **kwargs) -> Future:
         """Submit a task to Ray for execution and return a Future-like object"""
-        # Create a remote function from the provided function
-        remote_fn = self._ray.remote(fn)
+        # Extract arguments
+        action = args[0]  # The task function
+        next_task = args[1]  # NextTask object
+        context = args[2]  # Context object
+        logger = args[3] if len(args) > 3 else None  # Logger
+        
+        # Extract context data
+        context_data = {}
+        for key in context.states:
+            try:
+                value = context.get(key, None)
+                if value is not None:
+                    context_data[key] = value
+            except:
+                pass
+        
+        # Get logger name
+        logger_name = logger.name if logger else None
         
         # Submit the task to Ray
-        ray_object_ref = remote_fn.remote(*args, **kwargs)
+        ray_object_ref = self._ray_execute_task.remote(
+            action, next_task.id, next_task.inputs, context_data, logger_name
+        )
         
         # Wrap the Ray ObjectRef in a Future-like object
         return RayFuture(ray_object_ref, self._ray)
@@ -83,8 +136,15 @@ class RayFuture:
         """Return the result of the task, blocking if necessary"""
         if not self._done:
             try:
-                self._result = self._ray.get(self.object_ref)
+                result = self._ray.get(self.object_ref)
                 self._done = True
+                
+                # Check if the result is an error
+                if isinstance(result, dict) and "error" in result and "traceback" in result:
+                    self._exception = Exception(result["error"])
+                    raise self._exception
+                
+                self._result = result
             except Exception as e:
                 self._exception = e
                 self._done = True
