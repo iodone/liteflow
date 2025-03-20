@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "liteflow"
-version = "0.1.3"
+version = "0.1.4"
 description = "Lightweight task flow framework for Python"
 authors = ["Meta42"]
 readme = "README.md"
