@@ -48,6 +48,7 @@ class RayExecutor(Executor):
             from liteflow.flow import TaskOutput, NextTask
             from liteflow.context import Context
             import logging
+            import inspect
             
             # Create a context with the provided data
             ctx = Context()
@@ -60,17 +61,41 @@ class RayExecutor(Executor):
             
             # Execute the action
             try:
-                if task_inputs:
+                # Check if function accepts inputs parameter
+                sig = inspect.signature(action_fn)
+                params = list(sig.parameters.keys())
+                
+                if len(params) > 1 and params[1] == "inputs":
                     result = action_fn(ctx, inputs=task_inputs)
                 else:
                     result = action_fn(ctx)
+                
+                # Convert result to dict if it's a TaskOutput
+                if isinstance(result, TaskOutput):
+                    next_tasks = None
+                    if result.next_tasks:
+                        next_tasks = [
+                            {
+                                'id': nt.id,
+                                'inputs': nt.inputs,
+                                'spawn_another': nt.spawn_another
+                            }
+                            for nt in result.next_tasks
+                        ]
+                    
+                    return {
+                        'output': result.output,
+                        'next_tasks': next_tasks,
+                        'is_task_output': True
+                    }
                 
                 return result
             except Exception as e:
                 import traceback
                 error_info = {
-                    "error": str(e),
-                    "traceback": traceback.format_exc()
+                    'error': str(e),
+                    'traceback': traceback.format_exc(),
+                    'is_error': True
                 }
                 return error_info
         
@@ -84,7 +109,7 @@ class RayExecutor(Executor):
         context = args[2]  # Context object
         logger = args[3] if len(args) > 3 else None  # Logger
         
-        # Extract context data
+        # Extract context data - only include serializable data
         context_data = {}
         for key in context.states:
             try:
@@ -140,11 +165,28 @@ class RayFuture:
                 self._done = True
                 
                 # Check if the result is an error
-                if isinstance(result, dict) and "error" in result and "traceback" in result:
-                    self._exception = Exception(result["error"])
+                if isinstance(result, dict) and result.get('is_error', False):
+                    self._exception = Exception(result['error'])
                     raise self._exception
                 
-                self._result = result
+                # Check if the result is a TaskOutput
+                if isinstance(result, dict) and result.get('is_task_output', False):
+                    from liteflow.flow import TaskOutput, NextTask
+                    
+                    next_tasks = None
+                    if result.get('next_tasks'):
+                        next_tasks = [
+                            NextTask(
+                                nt['id'],
+                                nt['inputs'],
+                                nt['spawn_another']
+                            )
+                            for nt in result['next_tasks']
+                        ]
+                    
+                    self._result = TaskOutput(result['output'], next_tasks)
+                else:
+                    self._result = result
             except Exception as e:
                 self._exception = e
                 self._done = True
