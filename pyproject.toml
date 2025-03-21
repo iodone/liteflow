@@ -14,6 +14,9 @@ packages = [
 python = "<4,>=3.9"
 lmnr = "^0.4.62"
 
+[tool.poetry.extras]
+ray = ["ray"]
+
 [tool.poetry.group.dev.dependencies]
 pytest = ">=8.3.3"
 
