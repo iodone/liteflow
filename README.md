@@ -37,6 +37,16 @@ print(result)
 
 LiteFlow supports distributed execution using Ray. This allows you to scale your workflows across multiple cores or even multiple machines.
 
+#### Installation with Ray Support
+
+Ray is an optional dependency. To use Ray with LiteFlow, install it with:
+
+```bash
+pip install liteflow[ray]
+```
+
+#### Example Usage
+
 ```python
 from liteflow import Flow, TaskOutput, NextTask, RayExecutor
 
