@@ -1,6 +1,8 @@
 from abc import ABC, abstractmethod
 from concurrent.futures import Future, ThreadPoolExecutor
 from typing import Any, Callable
+import ray
+
 
 
 class Executor(ABC):
