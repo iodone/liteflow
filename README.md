@@ -33,6 +33,34 @@ result = flow.run("greet")  # Returns {"greet": "Hello World!"}
 print(result)
 ```
 
+### Using Ray for Distributed Execution
+
+LiteFlow supports distributed execution using Ray. This allows you to scale your workflows across multiple cores or even multiple machines.
+
+```python
+from liteflow import Flow, TaskOutput, NextTask, RayExecutor
+
+# Initialize Ray executor
+executor = RayExecutor()  # Connects to local Ray instance
+
+# For connecting to an existing Ray cluster:
+# executor = RayExecutor(address="auto")
+
+# Create flow with Ray executor
+flow = Flow(executor=executor)
+
+@flow.task("distributed_task")
+def distributed_task(context):
+    # This task will be executed as a Ray task
+    return TaskOutput(output="Executed in Ray!")
+
+result = flow.run("distributed_task")
+print(result)  # Returns {"distributed_task": "Executed in Ray!"}
+
+# Don't forget to shut down Ray when done
+executor.shutdown()
+```
+
 ### Task Chaining
 ```python
 # Tasks can trigger other tasks

@@ -13,6 +13,7 @@ packages = [
 [tool.poetry.dependencies]
 python = "<4,>=3.9"
 lmnr = "^0.4.62"
+ray = "^2.9.0"  # Add Ray as a dependency
 
 [tool.poetry.group.dev.dependencies]
 pytest = ">=8.3.3"
