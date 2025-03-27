@@ -14,7 +14,7 @@ except ImportError:
 class Executor(ABC):
     """Abstract base class for task executors"""
     @abstractmethod
-    def submit(self, fn: Callable, *args, **kwargs) -> Any:
+    def submit(self, fn: Callable, *args, **kwargs) -> Future:
         """Submit a task for execution"""
         pass
 
