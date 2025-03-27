@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "liteflow"
-version = "0.1.5"
+version = "0.2.0"
 description = "Lightweight task flow framework for Python"
 authors = ["Meta42"]
 readme = "README.md"
@@ -14,8 +14,12 @@ packages = [
 python = "<4,>=3.9"
 lmnr = "^0.4.62"
 
+[tool.poetry.extras]
+ray = ["ray"]
+
 [tool.poetry.group.dev.dependencies]
 pytest = ">=8.3.3"
+ray = "^2.9.0"  # Add Ray as a dev dependency for testing
 
 [tool.pytest.ini_options]
 pythonpath = [
